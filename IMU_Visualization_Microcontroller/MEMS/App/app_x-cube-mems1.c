@@ -453,7 +453,9 @@ static void FX_Data_Handler(TMsg *Msg)
         /* Run Sensor Fusion algorithm */
         BSP_LED_On(LED2);
         DWT_Start();
-        MotionFX_manager_run(pdata_in, pdata_out, MOTION_FX_ENGINE_DELTATIME);
+        // Commented out for Madgwick implementation instead
+        //MotionFX_manager_run(pdata_in, pdata_out, MOTION_FX_ENGINE_DELTATIME);
+        MadgwickAHRS(pdata_in, pdata_out, MOTION_FX_ENGINE_DELTATIME);
         elapsed_time_us = DWT_Stop();
         BSP_LED_Off(LED2);
 
