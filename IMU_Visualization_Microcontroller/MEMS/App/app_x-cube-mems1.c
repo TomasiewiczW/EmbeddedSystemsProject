@@ -38,6 +38,8 @@
 #include "bsp_ip_conf.h"
 #include "fw_version.h"
 
+#include "MadgwickAHRS.h"
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #define ALGO_FREQ    100U /* Algorithm frequency [Hz] */
@@ -352,6 +354,7 @@ static void MX_DataLogFusion_Process(void)
     /* Sensor Fusion specific part */
     FX_Data_Handler(&msg_dat);
 
+
     /* Send data stream */
     INIT_STREAMING_HEADER(&msg_dat);
     msg_dat.Len = STREAMING_MSG_LENGTH;
@@ -453,9 +456,11 @@ static void FX_Data_Handler(TMsg *Msg)
         /* Run Sensor Fusion algorithm */
         BSP_LED_On(LED2);
         DWT_Start();
+
         // Commented out for Madgwick implementation instead
         //MotionFX_manager_run(pdata_in, pdata_out, MOTION_FX_ENGINE_DELTATIME);
         MadgwickAHRS(pdata_in, pdata_out, MOTION_FX_ENGINE_DELTATIME);
+
         elapsed_time_us = DWT_Stop();
         BSP_LED_Off(LED2);
 
