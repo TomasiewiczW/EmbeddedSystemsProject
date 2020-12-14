@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    
+  * @file
   * @author  MCD Application Team
   * @version V2.0.0
   ******************************************************************************
@@ -33,11 +33,11 @@
   */
   /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef  __RTE_COMPONENTS_H__
-#define  __RTE_COMPONENTS_H__ 
+#define  __RTE_COMPONENTS_H__
 
 /* Defines ------------------------------------------------------------------*/
-/* STMicroelectronics.X-CUBE-MEMS1.7.2.0 */
+/* STMicroelectronics.X-CUBE-MEMS1.8.0.0 */
+#define IKS01A2
 #define IKS01A2_DATALOGFUSION_DEMO
-#define IKS01A2 
- 
+
 #endif /* __RTE_COMPONENTS_H__ */

@@ -236,6 +236,10 @@ void BSP_SENSOR_ACC_SetDRDYInt(uint8_t Enable)
   {
     reg = reg | 0x01;
   }
+  else
+  {
+    reg = reg & ~0x01;
+  }
 
   (void)IKS01A2_MOTION_SENSOR_Write_Register(IKS01A2_LSM6DSL_0, LSM6DSL_INT1_CTRL, reg);
 }
@@ -254,6 +258,10 @@ void BSP_SENSOR_GYR_SetDRDYInt(uint8_t Enable)
   if (Enable == 1)
   {
     reg = reg | 0x02;
+  }
+  else
+  {
+    reg = reg & ~0x02;
   }
 
   (void)IKS01A2_MOTION_SENSOR_Write_Register(IKS01A2_LSM6DSL_0, LSM6DSL_INT1_CTRL, reg);

@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 /* Exported defines ----------------------------------------------------------*/
-#define FW_VERSION  "7.2.0"
+#define FW_VERSION  "8.0.0"
 
 #ifdef __cplusplus
 }

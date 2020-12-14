@@ -20,9 +20,13 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
+#include <stdio.h>
+#include "stm32f4xx_hal.h"
+#include "stm32f4xx_nucleo.h"
 #include "com.h"
 #include "demo_serial.h"
-#include "app_x-cube-mems1.h"
+#include "fw_version.h"
+#include "motion_fx_manager.h"
 
 #ifdef USE_CUSTOM_BOARD
 #include "custom_mems_conf_app.h"
@@ -113,6 +117,9 @@ int HandleMSG(TMsg *Msg)
   uint32_t i;
   char ps[64];
   uint32_t ps_len = 0;
+  static uint32_t sensors_enabled_prev = 0;
+  int32_t msg_offset;
+  uint32_t msg_count;
 
   if (Msg->Len < 2U)
   {
@@ -282,6 +289,7 @@ int HandleMSG(TMsg *Msg)
       BSP_SENSOR_HUM_Disable();
 
       SensorsEnabled = 0;
+      UseOfflineData = 0;
 
       BUILD_REPLY_HEADER(Msg);
       UART_SendMsg(Msg);
@@ -297,6 +305,97 @@ int HandleMSG(TMsg *Msg)
       Msg->Len = 3;
       RTC_TimeRegulate(Msg->Data[3], Msg->Data[4], Msg->Data[5]);
       RTC_DateRegulate(Msg->Data[6], Msg->Data[7], Msg->Data[8], Msg->Data[9]);
+      UART_SendMsg(Msg);
+      break;
+
+    case CMD_Offline_Data:
+      if (Msg->Len < 55U)
+      {
+        return 0;
+      }
+
+      msg_offset = 4;
+      msg_count = (uint32_t)Msg->Data[3];
+
+      for (i = 0; i < msg_count; i++)
+      {
+        memcpy(&OfflineData[OfflineDataWriteIndex].hours, &Msg->Data[msg_offset], 1);
+        memcpy(&OfflineData[OfflineDataWriteIndex].minutes, &Msg->Data[msg_offset + 1], 1);
+        memcpy(&OfflineData[OfflineDataWriteIndex].seconds, &Msg->Data[msg_offset + 2], 1);
+        memcpy(&OfflineData[OfflineDataWriteIndex].subsec, &Msg->Data[msg_offset + 3], 1);
+
+        memcpy(&OfflineData[OfflineDataWriteIndex].pressure, &Msg->Data[msg_offset + 4], 4);
+        memcpy(&OfflineData[OfflineDataWriteIndex].temperature, &Msg->Data[msg_offset + 8], 4);
+        memcpy(&OfflineData[OfflineDataWriteIndex].humidity, &Msg->Data[msg_offset + 12], 4);
+
+        memcpy(&OfflineData[OfflineDataWriteIndex].acceleration_x_mg, &Msg->Data[msg_offset + 16], 4);
+        memcpy(&OfflineData[OfflineDataWriteIndex].acceleration_y_mg, &Msg->Data[msg_offset + 20], 4);
+        memcpy(&OfflineData[OfflineDataWriteIndex].acceleration_z_mg, &Msg->Data[msg_offset + 24], 4);
+
+        memcpy(&OfflineData[OfflineDataWriteIndex].angular_rate_x_mdps, &Msg->Data[msg_offset + 28], 4);
+        memcpy(&OfflineData[OfflineDataWriteIndex].angular_rate_y_mdps, &Msg->Data[msg_offset + 32], 4);
+        memcpy(&OfflineData[OfflineDataWriteIndex].angular_rate_z_mdps, &Msg->Data[msg_offset + 36], 4);
+
+        memcpy(&OfflineData[OfflineDataWriteIndex].magnetic_field_x_mgauss, &Msg->Data[msg_offset + 40], 4);
+        memcpy(&OfflineData[OfflineDataWriteIndex].magnetic_field_y_mgauss, &Msg->Data[msg_offset + 44], 4);
+        memcpy(&OfflineData[OfflineDataWriteIndex].magnetic_field_z_mgauss, &Msg->Data[msg_offset + 48], 4);
+
+        msg_offset += 52;
+
+        OfflineDataCount++;
+        if (OfflineDataCount > OFFLINE_DATA_SIZE)
+        {
+          OfflineDataCount = OFFLINE_DATA_SIZE;
+        }
+
+        OfflineDataWriteIndex++;
+        if (OfflineDataWriteIndex >= OFFLINE_DATA_SIZE)
+        {
+          OfflineDataWriteIndex = 0;
+        }
+      }
+
+      SensorReadRequest = 1;
+
+      /* Mark Msg as read */
+      BUILD_REPLY_HEADER(Msg);
+      Msg->Len = 3;
+      break;
+
+    case CMD_Use_Offline_Data:
+      if (Msg->Len < 4U)
+      {
+        return 0;
+      }
+
+      if (Msg->Data[3] == 1U)
+      {
+        UseOfflineData = 1U;
+        sensors_enabled_prev = SensorsEnabled;
+        SensorsEnabled = 0xFFFFFFFFU;
+        (void)HAL_TIM_Base_Stop_IT(&BSP_IP_TIM_Handle);
+      }
+      else
+      {
+        UseOfflineData = 0U;
+        SensorsEnabled = sensors_enabled_prev;
+      }
+
+      BUILD_REPLY_HEADER(Msg);
+      UART_SendMsg(Msg);
+      break;
+
+    case CMD_Get_App_Info:
+      if (Msg->Len < 3U)
+      {
+        return 0;
+      }
+
+      Serialize_s32(&Msg->Data[3], AlgoFreq, 4);
+      Serialize_s32(&Msg->Data[7], REQUIRED_DATA, 1);
+
+      BUILD_REPLY_HEADER(Msg);
+      Msg->Len = 3 + 5;
       UART_SendMsg(Msg);
       break;
 
@@ -329,6 +428,85 @@ int HandleMSG(TMsg *Msg)
   }
 
   return ret;
+}
+
+/**
+ * @brief  Configures the current date
+ * @param  y the year value to be set
+ * @param  m the month value to be set
+ * @param  d the day value to be set
+ * @param  dw the day-week value to be set
+ * @retval None
+ */
+void RTC_DateRegulate(uint8_t y, uint8_t m, uint8_t d, uint8_t dw)
+{
+  RTC_DateTypeDef sdatestructure;
+
+  sdatestructure.Year    = y;
+  sdatestructure.Month   = m;
+  sdatestructure.Date    = d;
+  sdatestructure.WeekDay = dw;
+
+  if (HAL_RTC_SetDate(&hrtc, &sdatestructure, FORMAT_BIN) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+}
+
+/**
+ * @brief  Configures the current time
+ * @param  hh the hour value to be set
+ * @param  mm the minute value to be set
+ * @param  ss the second value to be set
+ * @retval None
+ */
+void RTC_TimeRegulate(uint8_t hh, uint8_t mm, uint8_t ss)
+{
+  RTC_TimeTypeDef stimestructure;
+
+  stimestructure.Hours          = hh;
+  stimestructure.Minutes        = mm;
+  stimestructure.Seconds        = ss;
+  stimestructure.SubSeconds     = 0;
+  stimestructure.TimeFormat     = RTC_HOURFORMAT12_AM;
+  stimestructure.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
+  stimestructure.StoreOperation = RTC_STOREOPERATION_RESET;
+
+  if (HAL_RTC_SetTime(&hrtc, &stimestructure, FORMAT_BIN) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
+}
+
+/**
+ * @brief  Gets Presentation string
+ * @param  PresentationString the Presentation string
+ * @param  Length the length of Presentation string
+ * @retval None
+ */
+void Get_PresentationString(char *PresentationString, uint32_t *Length)
+{
+  const uint8_t string_pointer_shift = strlen("ST MotionXX v"); /* Shift string pointer by this amount */
+  char *lib_version_num;
+  char lib_version_string[64];
+  int lib_version_len = 0;
+  const char ps[] = {"MEMS shield demo,4,"FW_VERSION",%s,"BOARD_NAME};
+
+  MotionFX_manager_get_version(lib_version_string, &lib_version_len);
+
+  /* Shorten library version string (e.g.: ST MotionXX v1.0.0) to contain version number only (e.g.: 1.0.0) */
+  if (lib_version_len > string_pointer_shift)
+  {
+    lib_version_num = lib_version_string + string_pointer_shift;
+  }
+  else
+  {
+    lib_version_num = lib_version_string;
+  }
+
+  *Length = snprintf(PresentationString, 64, ps, lib_version_num);
 }
 
 /**

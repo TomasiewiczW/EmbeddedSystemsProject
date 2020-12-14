@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : stmicroelectronics_x-cube-mems1_7_2_0.h
+  * File Name          : app_mems.h
   * Description        : This file provides code for the configuration
-  *                      of the STMicroelectronics.X-CUBE-MEMS1.7.2.0 instances.
+  *                      of the STMicroelectronics.X-CUBE-MEMS1.8.0.0 instances.
   ******************************************************************************
   *
   * COPYRIGHT 2020 STMicroelectronics
@@ -22,8 +22,8 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __APP_X_CUBE_MEMS1_H
-#define __APP_X_CUBE_MEMS1_H
+#ifndef __APP_MEMS_H
+#define __APP_MEMS_H
 
 #ifdef __cplusplus
  extern "C" {
@@ -31,25 +31,16 @@
 
 /* Includes ------------------------------------------------------------------*/
 
-#include "iks01a2_mems_control.h"
-#include "iks01a2_mems_control_ex.h"
-
 /* Exported defines ----------------------------------------------------------*/
-
-#define BOARD_NAME "IKS01A2"
 
 /* Exported functions --------------------------------------------------------*/
 void MX_MEMS_Init(void);
 void MX_MEMS_Process(void);
 
-void RTC_DateRegulate(uint8_t y, uint8_t m, uint8_t d, uint8_t dw);
-void RTC_TimeRegulate(uint8_t hh, uint8_t mm, uint8_t ss);
-void Get_PresentationString(char *PresentationString, uint32_t *Length);
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __APP_X_CUBE_MEMS1_H */
+#endif /* __APP_MEMS_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

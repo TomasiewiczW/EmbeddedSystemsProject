@@ -59,11 +59,7 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Blue_Button_Pin GPIO_PIN_13
-#define Blue_Button_GPIO_Port GPIOC
-#define Blue_Button_EXTI_IRQn EXTI15_10_IRQn
-#define Green_LED_Pin GPIO_PIN_5
-#define Green_LED_GPIO_Port GPIOA
+#define BSP_BUTTON_EXTI_IRQn EXTI15_10_IRQn
 void   MX_TIM3_Init(void);
 /* USER CODE BEGIN Private defines */
 

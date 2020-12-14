@@ -50,6 +50,8 @@ extern "C" {
 #define AIS3624DQ_UNICLEO_ID        19
 #define LSM6DSRX_UNICLEO_ID         20
 #define LSM6DSO32_UNICLEO_ID        21
+#define IIS2ICLX_UNICLEO_ID         22
+#define LSM6DSM_UNICLEO_ID          23
 
 #define LIS3MDL_UNICLEO_ID          1
 #define LSM303AGR_UNICLEO_ID_MAG    2
@@ -62,6 +64,7 @@ extern "C" {
 #define LPS22HB_UNICLEO_ID          3
 #define LPS22HH_UNICLEO_ID          4
 #define LPS33HW_UNICLEO_ID          5
+#define LPS33K_UNICLEO_ID           6
 
 #define HTS221_UNICLEO_ID           1
 #define STTS751_UNICLEO_ID          2

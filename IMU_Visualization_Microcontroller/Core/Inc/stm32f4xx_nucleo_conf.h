@@ -19,24 +19,24 @@
 /** @addtogroup BSP
   * @{
   */
-  
+
 /** @addtogroup STM32F4XX_NUCLEO
   * @{
   */
 
 /** @defgroup STM32F4XX_NUCLEO_CONFIG Config
   * @{
-  */ 
-  
+  */
+
 /** @defgroup STM32F4XX_NUCLEO_CONFIG_Exported_Constants
   * @{
-  */ 
+  */
 /* COM Feature define */
 #define USE_BSP_COM_FEATURE                 1U
 
 /* COM define */
 #define USE_COM_LOG                         1U
-   
+
 /* IRQ priorities */
 #define BSP_BUTTON_USER_IT_PRIORITY         15U
 
@@ -55,18 +55,18 @@
 /**
   * @}
   */
-  
+
 /**
   * @}
   */
-  
+
 /**
   * @}
   */
-  
+
 #ifdef __cplusplus
 }
-#endif   
+#endif
 #endif  /* STM32F4XX_NUCLEO_CONF_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

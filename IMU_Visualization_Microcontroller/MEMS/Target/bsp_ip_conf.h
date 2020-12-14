@@ -25,6 +25,15 @@
 extern "C" {
 #endif
 
+/* Includes ------------------------------------------------------------------*/
+
+#include "iks01a2_mems_control.h"
+#include "iks01a2_mems_control_ex.h"
+
+/* Exported defines ----------------------------------------------------------*/
+
+#define BOARD_NAME "IKS01A2"
+
 /* Exported variables --------------------------------------------------------*/
 /* Exported defines ----------------------------------------------------------*/
 extern TIM_HandleTypeDef htim3;

@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    motion_fx_cm0p.h
   * @author  MEMS Application Team
-  * @version V2.4.0
+  * @version V2.4.1
   * @date    10-February-2020
   * @brief   Header for motion_fx_cm0p module
   ******************************************************************************
